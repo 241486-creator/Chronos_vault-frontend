@@ -1,8 +1,4 @@
-/* CHRONOS_VAULT_V3: THE ULTIMATE HACKER INTERFACE 
-  - Full Fixed Version
-  - No Unclosed Blocks
-*/
-
+/* CHRONOS_VAULT_FINAL_FIX */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@800&display=swap');
 
 body,
@@ -17,7 +13,6 @@ html {
   font-family: 'Share Tech Mono', monospace;
 }
 
-/* 1. BACKGROUND & OVERLAYS */
 #matrix {
   position: fixed;
   top: 0;
@@ -49,7 +44,6 @@ html {
   pointer-events: none;
 }
 
-/* 2. LOGIN GATE */
 .login-gate {
   display: flex;
   justify-content: center;
@@ -81,7 +75,6 @@ html {
   outline: none;
 }
 
-/* 3. UI LAYOUT */
 .ui-overlay {
   position: relative;
   height: 100vh;
@@ -111,7 +104,6 @@ html {
   letter-spacing: 1px;
 }
 
-/* 4. CENTER INTERFACE */
 .center-interface {
   flex: 1;
   max-width: 600px;
@@ -134,7 +126,6 @@ html {
   text-shadow: 0 0 15px #00ff41;
 }
 
-/* 5. INPUTS */
 .input-arena {
   width: 100%;
   display: flex;
@@ -167,7 +158,6 @@ html {
   outline: none;
 }
 
-/* 6. BUTTONS */
 .btn-group-horizontal {
   display: flex;
   gap: 15px;
@@ -205,7 +195,6 @@ html {
   box-shadow: 0 0 30px white;
 }
 
-/* 7. DATA TABLE */
 .data-table-container {
   margin-top: 40px;
   width: 100%;
@@ -214,19 +203,6 @@ html {
   border: 1px solid rgba(0, 255, 65, 0.2);
   background: rgba(0, 10, 0, 0.6);
   padding: 10px;
-  animation: decrypt-slide 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes decrypt-slide {
-  from {
-    opacity: 0;
-    transform: scaleY(0);
-  }
-
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
 }
 
 .cyber-table {
@@ -249,7 +225,6 @@ html {
   border-bottom: 1px solid rgba(0, 255, 65, 0.1);
 }
 
-/* 8. MINI WIDGETS */
 .log-scroll {
   height: 150px;
   border-left: 1px solid rgba(0, 255, 65, 0.3);
@@ -305,20 +280,6 @@ html {
   box-shadow: 0 0 10px #00ff41;
 }
 
-.heat-map {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.heat-box {
-  width: 20px;
-  height: 20px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
-  background: rgba(0, 255, 65, 0.05);
-}
-
 .bottom-wave {
   position: fixed;
   bottom: 10px;
@@ -330,7 +291,6 @@ html {
   color: #00ff41;
 }
 
-/* FANCY UTILITIES */
 .eye-btn-fancy,
 .del-btn-fancy,
 .input-eye-fancy {
@@ -341,12 +301,6 @@ html {
   cursor: pointer;
   padding: 3px 6px;
   font-family: 'Share Tech Mono';
-  transition: 0.2s;
-}
-
-.eye-btn-fancy:hover {
-  background: #00ff41;
-  color: black;
 }
 
 .del-btn-fancy {
@@ -355,28 +309,15 @@ html {
   margin-left: 5px;
 }
 
-.del-btn-fancy:hover {
-  background: #ff3e3e;
-  color: black;
-}
-
 .pass-text {
   color: #00ff41;
   text-shadow: 0 0 5px #00ff41;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #00ff41;
-}
-
-.binary-stream {
-  font-size: 0.6rem;
-  opacity: 0.3;
-  word-break: break-all;
-  margin-top: 10px;
 }

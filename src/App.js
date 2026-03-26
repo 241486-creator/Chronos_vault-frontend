@@ -3,8 +3,8 @@ import CryptoJS from 'crypto-js';
 import './App.css';
 
 function App() {
-  // --- CONFIG ---
-  const API_URL = "https://chronos-vault-backend.vercel.app"; // Aapka Vercel Link
+  // --- CONFIG (YAHA APNA LINK DALO) ---
+  const API_URL = "https://chronos-vault-backend.vercel.app";
   const MASTER_CODE = "1234";
   const SECRET_KEY = "CHRONOS_SUPER_SECRET_123";
 
@@ -19,7 +19,7 @@ function App() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [masterInput, setMasterInput] = useState("");
 
-  // --- MATRIX BACKGROUND EFFECT ---
+  // --- MATRIX EFFECT ---
   useEffect(() => {
     const canvas = document.getElementById('matrix');
     if (!canvas) return;
@@ -46,13 +46,13 @@ function App() {
     return () => clearInterval(interval);
   }, [isAuthorized]);
 
-  // --- LOGIC FUNCTIONS ---
+  // --- FUNCTIONS ---
   const handleLogin = () => {
     if (masterInput === MASTER_CODE) {
       setIsAuthorized(true);
-      setLogs(prev => [`> IDENTITY_VERIFIED`, `> WELCOME_AGENT_001`, ...prev]);
+      setLogs(prev => [`> IDENTITY_VERIFIED`, ...prev]);
     } else {
-      alert("ACCESS_DENIED: INVALID_MASTER_KEY");
+      alert("ACCESS_DENIED");
       setMasterInput("");
     }
   };
@@ -60,16 +60,17 @@ function App() {
   const savePassword = async () => {
     if (!site || !pwd) return;
     const encryptedText = CryptoJS.AES.encrypt(pwd, SECRET_KEY).toString();
-
     try {
-      await fetch(`${API_URL}/add-password`, {
+      const res = await fetch(`${API_URL}/add-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ site_name: site, password_text: encryptedText })
       });
-      setLogs(prev => [`> DATA_ENCRYPTED: ${site}`, ...prev].slice(0, 8));
-      setSite(""); setPwd("");
-      fetchVault();
+      if (res.ok) {
+        setLogs(prev => [`> DATA_ENCRYPTED: ${site}`, ...prev]);
+        setSite(""); setPwd("");
+        fetchVault();
+      }
     } catch (e) { setLogs(prev => [`> UPLINK_ERROR`, ...prev]); }
   };
 
@@ -79,7 +80,7 @@ function App() {
       const data = await res.json();
       setVaultData(Array.isArray(data) ? data : []);
       setShowTable(true);
-      setLogs(prev => [`> DECRYPTED: ${data.length || 0} NODES`, ...prev]);
+      setLogs(prev => [`> DECRYPTED: ${data.length} NODES`, ...prev]);
     } catch (e) { setLogs(prev => [`> ACCESS_DENIED`, ...prev]); }
   };
 
@@ -94,9 +95,8 @@ function App() {
   const getDecryptedPassword = (cipherText) => {
     try {
       const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
-      const originalText = bytes.toString(CryptoJS.enc.Utf8);
-      return originalText || "DECRYPT_ERR";
-    } catch (e) { return "INVALID_KEY"; }
+      return bytes.toString(CryptoJS.enc.Utf8) || "DECRYPT_ERR";
+    } catch (e) { return "ERR"; }
   };
 
   if (!isAuthorized) {
@@ -106,14 +106,7 @@ function App() {
         <div className="login-box">
           <div className="header-tag">IDENTITY_CHECK</div>
           <h2 className="glow-text">ENTER_MASTER_KEY</h2>
-          <input
-            type="password"
-            className="master-input"
-            value={masterInput}
-            onChange={(e) => setMasterInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            autoFocus
-          />
+          <input type="password" className="master-input" value={masterInput} onChange={(e) => setMasterInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} autoFocus />
           <button className="auth-trigger" onClick={handleLogin}>VERIFY_ID</button>
         </div>
       </div>
@@ -123,22 +116,14 @@ function App() {
   return (
     <div className="hacker-screen">
       <canvas id="matrix"></canvas>
-      <div className="vignette"></div>
       <div className="scanlines"></div>
-
       <div className="ui-overlay">
         <div className="float-stats left">
           <div className="header-tag">SYSTEM_MONITOR</div>
-          <div className="mini-bars">
-            <div className="bar-label">CPU_LOAD</div>
-            <div className="bar-container"><div className="bar-fill" style={{ width: '65%' }}></div></div>
-          </div>
           <div className="log-scroll">
             {logs.map((log, i) => <div key={i} className="log-line">{log}</div>)}
           </div>
-          <div className="binary-stream">10110010101101</div>
         </div>
-
         <div className="center-interface">
           <h1 className="main-logo">CHRONOS<span>VAULT</span></h1>
           <div className="input-arena">
@@ -149,16 +134,13 @@ function App() {
             <div className="cyber-field">
               <span className="prefix">HASH::</span>
               <input type={showInputPass ? "text" : "password"} value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="KEY" />
-              <button className="input-eye-fancy" onClick={() => setShowInputPass(!showInputPass)}>
-                {showInputPass ? "HIDE" : "SHOW"}
-              </button>
+              <button className="input-eye-fancy" onClick={() => setShowInputPass(!showInputPass)}>{showInputPass ? "HIDE" : "SHOW"}</button>
             </div>
             <div className="btn-group-horizontal">
               <button className="auth-trigger" onClick={savePassword}>ENCRYPT</button>
               <button className="auth-trigger decrypt" onClick={fetchVault}>DECRYPT</button>
             </div>
           </div>
-
           {showTable && (
             <div className="data-table-container">
               <table className="cyber-table">
@@ -167,13 +149,9 @@ function App() {
                   {vaultData.map((d) => (
                     <tr key={d.id}>
                       <td>{d.site_name}</td>
-                      <td className="pass-text">
-                        {visiblePasswords[d.id] ? getDecryptedPassword(d.password_text) : "••••••••"}
-                      </td>
-                      <td className="actions-cell">
-                        <button className="eye-btn-fancy" onClick={() => setVisiblePasswords(prev => ({ ...prev, [d.id]: !prev[d.id] }))}>
-                          {visiblePasswords[d.id] ? "HIDE" : "VIEW"}
-                        </button>
+                      <td className="pass-text">{visiblePasswords[d.id] ? getDecryptedPassword(d.password_text) : "••••••••"}</td>
+                      <td>
+                        <button className="eye-btn-fancy" onClick={() => setVisiblePasswords(p => ({ ...p, [d.id]: !p[d.id] }))}>VIEW</button>
                         <button className="del-btn-fancy" onClick={() => deleteNode(d.id)}>TERM</button>
                       </td>
                     </tr>
@@ -183,17 +161,11 @@ function App() {
             </div>
           )}
         </div>
-
         <div className="float-stats right">
-          <div className="header-tag">SECURITY_INTEL</div>
+          <div className="header-tag">SECURITY</div>
           <div className="radar-circle"><div className="radar-sweep"></div></div>
-          <div className="loading-bar-hacker"></div>
-          <div className="heat-map">
-            {[...Array(8)].map((_, i) => <div key={i} className="heat-box"></div>)}
-          </div>
         </div>
       </div>
-      <div className="bottom-wave">SYSTEM_SECURE // ENCRYPTION_ACTIVE</div>
     </div>
   );
 }
