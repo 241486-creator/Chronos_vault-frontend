@@ -1,0 +1,382 @@
+/* CHRONOS_VAULT_V3: THE ULTIMATE HACKER INTERFACE 
+  - Full Fixed Version
+  - No Unclosed Blocks
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@800&display=swap');
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* 1. BACKGROUND & OVERLAYS */
+#matrix {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  opacity: 0.15;
+}
+
+.vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 20%, black 95%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+  background-size: 100% 3px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* 2. LOGIN GATE */
+.login-gate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  height: 100vh;
+}
+
+.login-box {
+  background: rgba(0, 20, 0, 0.8);
+  border: 1px solid #00ff41;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+  z-index: 101;
+  min-width: 300px;
+}
+
+.master-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #00ff41;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 2rem;
+  text-align: center;
+  width: 100%;
+  margin: 20px 0;
+  outline: none;
+}
+
+/* 3. UI LAYOUT */
+.ui-overlay {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+.float-stats {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.header-tag {
+  font-size: 0.7rem;
+  background: #00ff41;
+  color: black;
+  padding: 2px 5px;
+  width: fit-content;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* 4. CENTER INTERFACE */
+.center-interface {
+  flex: 1;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 12px;
+  margin: 10px 0 40px 0;
+  color: white;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.main-logo span {
+  color: #00ff41;
+  text-shadow: 0 0 15px #00ff41;
+}
+
+/* 5. INPUTS */
+.input-arena {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.cyber-field {
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.prefix {
+  font-size: 0.9rem;
+  color: #00ff41;
+  opacity: 0.7;
+  margin-right: 15px;
+}
+
+.cyber-field input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.3rem;
+  width: 100%;
+  outline: none;
+}
+
+/* 6. BUTTONS */
+.btn-group-horizontal {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.auth-trigger {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #00ff41;
+  color: #00ff41;
+  padding: 15px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.auth-trigger:hover {
+  background: #00ff41;
+  color: black;
+  box-shadow: 0 0 30px #00ff41;
+}
+
+.auth-trigger.decrypt {
+  border: 1px solid #ffffff;
+  color: white;
+}
+
+.auth-trigger.decrypt:hover {
+  background: white;
+  color: black;
+  box-shadow: 0 0 30px white;
+}
+
+/* 7. DATA TABLE */
+.data-table-container {
+  margin-top: 40px;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  background: rgba(0, 10, 0, 0.6);
+  padding: 10px;
+  animation: decrypt-slide 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes decrypt-slide {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.cyber-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cyber-table th {
+  text-align: left;
+  color: #00ff41;
+  font-size: 0.7rem;
+  padding: 10px;
+  border-bottom: 1px solid #00ff41;
+}
+
+.cyber-table td {
+  padding: 10px;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+}
+
+/* 8. MINI WIDGETS */
+.log-scroll {
+  height: 150px;
+  border-left: 1px solid rgba(0, 255, 65, 0.3);
+  padding-left: 10px;
+  font-size: 0.65rem;
+  overflow: hidden;
+  color: #00ff41;
+  margin-top: 10px;
+}
+
+.log-line {
+  margin-bottom: 4px;
+}
+
+.radar-circle {
+  width: 80px;
+  height: 80px;
+  border: 1px solid rgba(0, 255, 65, 0.4);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.radar-sweep {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 255, 65, 0.4));
+  animation: rotate-radar 3s linear infinite;
+}
+
+@keyframes rotate-radar {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bar-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 255, 65, 0.1);
+  margin-top: 5px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #00ff41;
+  box-shadow: 0 0 10px #00ff41;
+}
+
+.heat-map {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.heat-box {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+.bottom-wave {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.6rem;
+  letter-spacing: 5px;
+  opacity: 0.5;
+  color: #00ff41;
+}
+
+/* FANCY UTILITIES */
+.eye-btn-fancy,
+.del-btn-fancy,
+.input-eye-fancy {
+  background: transparent;
+  border: 1px solid #00ff41;
+  color: #00ff41;
+  font-size: 0.6rem;
+  cursor: pointer;
+  padding: 3px 6px;
+  font-family: 'Share Tech Mono';
+  transition: 0.2s;
+}
+
+.eye-btn-fancy:hover {
+  background: #00ff41;
+  color: black;
+}
+
+.del-btn-fancy {
+  border-color: #ff3e3e;
+  color: #ff3e3e;
+  margin-left: 5px;
+}
+
+.del-btn-fancy:hover {
+  background: #ff3e3e;
+  color: black;
+}
+
+.pass-text {
+  color: #00ff41;
+  text-shadow: 0 0 5px #00ff41;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ff41;
+}
+
+.binary-stream {
+  font-size: 0.6rem;
+  opacity: 0.3;
+  word-break: break-all;
+  margin-top: 10px;
+}
