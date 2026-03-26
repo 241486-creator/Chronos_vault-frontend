@@ -1,171 +1,121 @@
-import React, { useState, useEffect } from 'react';
-import CryptoJS from 'crypto-js';
-import './App.css';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import './App.css'; // Animations ke liye CSS zaroori hai
+
+// APNA LIVE BACKEND LINK YAHAN DALO
+const API_URL = "https://chronos-vault-backend.vercel.app";
 
 function App() {
-  // --- CONFIG (YAHA APNA LINK DALO) ---
-  const API_URL = "https://chronos-vault-backend.vercel.app";
-  const MASTER_CODE = "1234";
-  const SECRET_KEY = "CHRONOS_SUPER_SECRET_123";
-
-  // --- STATES ---
-  const [site, setSite] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [logs, setLogs] = useState(["[SYSTEM_BOOT_READY]", "[NODE_ISLAMABAD_ONLINE]"]);
+  const [siteName, setSiteName] = useState('');
+  const [passwordText, setPasswordText] = useState('');
   const [vaultData, setVaultData] = useState([]);
-  const [showTable, setShowTable] = useState(false);
-  const [visiblePasswords, setVisiblePasswords] = useState({});
-  const [showInputPass, setShowInputPass] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [masterInput, setMasterInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('SYSTEM_READY');
 
-  // --- MATRIX EFFECT ---
-  useEffect(() => {
-    const canvas = document.getElementById('matrix');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const letters = "011011010101";
-    const fontSize = 18;
-    const columns = canvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
-    const draw = () => {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#00ff41";
-      ctx.font = fontSize + "px monospace";
-      drops.forEach((y, i) => {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, y * fontSize);
-        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-      });
-    };
-    const interval = setInterval(draw, 40);
-    return () => clearInterval(interval);
-  }, [isAuthorized]);
-
-  // --- FUNCTIONS ---
-  const handleLogin = () => {
-    if (masterInput === MASTER_CODE) {
-      setIsAuthorized(true);
-      setLogs(prev => [`> IDENTITY_VERIFIED`, ...prev]);
-    } else {
-      alert("ACCESS_DENIED");
-      setMasterInput("");
+  // 1. Database se passwords mangwana
+  const fetchPasswords = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/get-passwords`);
+      setVaultData(response.data);
+      setStatus('DATA_SYNC_COMPLETE');
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setStatus('UPLINK_ERROR');
     }
   };
 
-  const savePassword = async () => {
-    if (!site || !pwd) return;
-    const encryptedText = CryptoJS.AES.encrypt(pwd, SECRET_KEY).toString();
+  useEffect(() => {
+    fetchPasswords();
+  }, []);
+
+  // 2. Naya password save (Encrypt) karna
+  const handleEncrypt = async () => {
+    if (!siteName || !passwordText) {
+      setStatus('INPUT_REQUIRED');
+      return;
+    }
+
+    setLoading(true);
+    setStatus('ENCRYPTING...');
+
     try {
-      const res = await fetch(`${API_URL}/add-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ site_name: site, password_text: encryptedText })
+      await axios.post(`${API_URL}/add-password`, {
+        site_name: siteName,
+        password_text: passwordText
       });
-      if (res.ok) {
-        setLogs(prev => [`> DATA_ENCRYPTED: ${site}`, ...prev]);
-        setSite(""); setPwd("");
-        fetchVault();
-      }
-    } catch (e) { setLogs(prev => [`> UPLINK_ERROR`, ...prev]); }
-  };
 
-  const fetchVault = async () => {
-    try {
-      const res = await fetch(`${API_URL}/get-passwords`);
-      const data = await res.json();
-      setVaultData(Array.isArray(data) ? data : []);
-      setShowTable(true);
-      setLogs(prev => [`> DECRYPTED: ${data.length} NODES`, ...prev]);
-    } catch (e) { setLogs(prev => [`> ACCESS_DENIED`, ...prev]); }
+      setSiteName('');
+      setPasswordText('');
+      setStatus('IDENTITY_VERIFIED');
+      fetchPasswords(); // List refresh karein
+    } catch (err) {
+      console.error("Encryption error:", err);
+      setStatus('SERVER_OFFLINE');
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const deleteNode = async (id) => {
-    try {
-      await fetch(`${API_URL}/delete-password/${id}`, { method: 'DELETE' });
-      setLogs(prev => [`> PURGED: NODE_${id}`, ...prev]);
-      fetchVault();
-    } catch (e) { setLogs(prev => [`> DELETE_FAILED`, ...prev]); }
-  };
-
-  const getDecryptedPassword = (cipherText) => {
-    try {
-      const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
-      return bytes.toString(CryptoJS.enc.Utf8) || "DECRYPT_ERR";
-    } catch (e) { return "ERR"; }
-  };
-
-  if (!isAuthorized) {
-    return (
-      <div className="hacker-screen login-gate">
-        <canvas id="matrix"></canvas>
-        <div className="login-box">
-          <div className="header-tag">IDENTITY_CHECK</div>
-          <h2 className="glow-text">ENTER_MASTER_KEY</h2>
-          <input type="password" className="master-input" value={masterInput} onChange={(e) => setMasterInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} autoFocus />
-          <button className="auth-trigger" onClick={handleLogin}>VERIFY_ID</button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="hacker-screen">
-      <canvas id="matrix"></canvas>
-      <div className="scanlines"></div>
-      <div className="ui-overlay">
-        <div className="float-stats left">
-          <div className="header-tag">SYSTEM_MONITOR</div>
-          <div className="log-scroll">
-            {logs.map((log, i) => <div key={i} className="log-line">{log}</div>)}
+    <div className="hacker-container">
+      {/* Background Matrix Effect (Optional: Add via CSS) */}
+      <div className="overlay"></div>
+
+      <header className="terminal-header">
+        <h1 className="glitch" data-text="CHRONOS VAULT">CHRONOS VAULT</h1>
+        <div className="status-bar">
+          <span className="blink">●</span> {status} | NODE_ISLAMABAD_ONLINE
+        </div>
+      </header>
+
+      <main className="vault-interface">
+        <section className="input-zone">
+          <div className="input-group">
+            <label>NODE_ID::</label>
+            <input
+              type="text"
+              value={siteName}
+              onChange={(e) => setSiteName(e.target.value.toUpperCase())}
+              placeholder="ENTER_SITE_NAME..."
+            />
           </div>
-        </div>
-        <div className="center-interface">
-          <h1 className="main-logo">CHRONOS<span>VAULT</span></h1>
-          <div className="input-arena">
-            <div className="cyber-field">
-              <span className="prefix">NODE::</span>
-              <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="STATION" />
-            </div>
-            <div className="cyber-field">
-              <span className="prefix">HASH::</span>
-              <input type={showInputPass ? "text" : "password"} value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="KEY" />
-              <button className="input-eye-fancy" onClick={() => setShowInputPass(!showInputPass)}>{showInputPass ? "HIDE" : "SHOW"}</button>
-            </div>
-            <div className="btn-group-horizontal">
-              <button className="auth-trigger" onClick={savePassword}>ENCRYPT</button>
-              <button className="auth-trigger decrypt" onClick={fetchVault}>DECRYPT</button>
-            </div>
+
+          <div className="input-group">
+            <label>HASH_KEY::</label>
+            <input
+              type="password"
+              value={passwordText}
+              onChange={(e) => setPasswordText(e.target.value)}
+              placeholder="ENTER_SECRET_KEY..."
+            />
           </div>
-          {showTable && (
-            <div className="data-table-container">
-              <table className="cyber-table">
-                <thead><tr><th>NODE</th><th>KEY_HASH</th><th>ACTION</th></tr></thead>
-                <tbody>
-                  {vaultData.map((d) => (
-                    <tr key={d.id}>
-                      <td>{d.site_name}</td>
-                      <td className="pass-text">{visiblePasswords[d.id] ? getDecryptedPassword(d.password_text) : "••••••••"}</td>
-                      <td>
-                        <button className="eye-btn-fancy" onClick={() => setVisiblePasswords(p => ({ ...p, [d.id]: !p[d.id] }))}>VIEW</button>
-                        <button className="del-btn-fancy" onClick={() => deleteNode(d.id)}>TERM</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-        <div className="float-stats right">
-          <div className="header-tag">SECURITY</div>
-          <div className="radar-circle"><div className="radar-sweep"></div></div>
-        </div>
-      </div>
+
+          <button className="hacker-btn" onClick={handleEncrypt} disabled={loading}>
+            {loading ? "PROCESSING..." : "EXECUTE_ENCRYPTION"}
+          </button>
+        </section>
+
+        <section className="display-zone">
+          <h2 className="section-title">DECRYPTED_LOGS:</h2>
+          <div className="logs-container">
+            {vaultData.length === 0 ? (
+              <p className="no-data">NO_RECORDS_FOUND_IN_VAULT</p>
+            ) : (
+              vaultData.map((item, index) => (
+                <div key={index} className="log-entry">
+                  <span className="log-time">[{new Date(item.created_at).toLocaleTimeString()}]</span>
+                  <span className="log-site"> SITE: {item.site_name}</span>
+                  <span className="log-pass"> PASS: {item.password_text}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </main>
+
+      <footer className="terminal-footer">
+        <p>© 2026 CHRONOS_SECURITY_SYSTEMS v2.0</p>
+      </footer>
     </div>
   );
 }
